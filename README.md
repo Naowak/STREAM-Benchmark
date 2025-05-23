@@ -55,35 +55,58 @@ print(f"Score: {score}")
 ### Memory Tests
 ### Postcasting Tasks
 - **`discrete_postcasting`**: Copy discrete sequences after a delay  
+
     ![discrete_postcasting](images/discrete_postcasting.png)
+
 - **`continuous_postcasting`**: Copy continuous sequences after a delay  
+
     ![continuous_postcasting](images/continuous_postcasting.png)
 
 ### Signal Processing
-- **`sinus_forecasting`**: Predict frequency-modulated sinusoidal signals  
+- **`sinus_forecasting`**: Predict frequency-modulated sinusoidal signals 
+
     ![sinus_forecasting](images/sinus_forecasting.png)
-- **`chaotic_forecasting`**: Forecast Lorenz system dynamics  
+
+- **`chaotic_forecasting`**: Forecast Lorenz system dynamics 
+
     ![chaotic_forecasting](images/chaotic_forecasting.png)
+
 
 ### Long-term Dependencies
 - **`discrete_pattern_completion`**: Complete masked repetitive patterns (discrete)  
+
     ![discrete_pattern_completion](images/discrete_pattern_completion.png)
-- **`continuous_pattern_completion`**: Complete masked repetitive patterns (continuous)  
+
+- **`continuous_pattern_completion`**: Complete masked repetitive patterns (continuous) 
+
     ![continuous_pattern_completion](images/continuous_pattern_completion.png)
+
 - **`simple_copy`**: Memorize and reproduce sequences after delay + trigger  
+
     ![simple_copy](images/simple_copy.png)
+
 - **`selective_copy`**: Memorize only marked elements and reproduce them  
+
     ![selective_copy](images/selective_copy.png)
+
 
 ### Information Manipulation
 - **`adding_problem`**: Add numbers at marked positions  
+
     ![adding_problem](images/adding_problem.png)
-- **`sorting_problem`**: Sort sequences according to given positions  
+    
+- **`sorting_problem`**: Sort sequences according to given positions 
+ 
     ![sorting_problem](images/sorting_problem.png)
-- **`bracket_matching`**: Validate parentheses sequences  
+    
+- **`bracket_matching`**: Validate parentheses sequences
+  
     ![bracket_matching](images/bracket_matching.png)
-- **`sequential_mnist`**: Classify MNIST digits read column by column  
+    
+- **`sequential_mnist`**: Classify MNIST digits read column by column 
+ 
     ![sequential_mnist](images/sequential_mnist.png)
+    
 
 ## 🔧 Task Configuration
 
