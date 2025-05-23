@@ -1,0 +1,18 @@
+[project]
+name = "stream-benchmark"
+version = "0.1.0"
+description = "STREAM (Sequential Tasks Review to Evaluate Artificial Memory) is a benchmark of 12 diverse sequential tasks to assess neural networks’ memory. Scalable in complexity and sequence length, it covers pattern completion, copy tasks, forecasting, bracket matching, and sorting—ideal for comparing architectures on memory retention and sequential reasoning."
+authors = [
+    { name="Yannis Bendi-Ouis", email="yannis.bendiouis@gmail.com" }
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "datasets",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
