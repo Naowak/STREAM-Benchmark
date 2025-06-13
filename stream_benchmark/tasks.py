@@ -1,5 +1,6 @@
 import numpy as np
 from datasets import load_dataset
+import os
 
 
 # ------------ USEFUL FUNCTIONS ------------ #
@@ -519,7 +520,7 @@ def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_len
     # Generate the samples
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
-def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path=None, cache_dir=None):
+def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./data/mnist/", cache_dir="./data/"):
     """
     [Multi sequence]
     Generates an MNIST image classification task: the model must read an image column by column,
@@ -529,15 +530,20 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path=None, 
     - n_train (int): number of training samples
     - n_valid (int): number of validation samples
     - n_test (int): number of test samples
-    - path (str): path to the MNIST dataset, if None, the dataset is downloaded
-    - cache_dir (str): path to the huggingface cache folder, if None, the default cache is used
+    - path (str): path to the MNIST dataset, if path does not exist, the dataset is downloaded
+    - cache_dir (str): path to the huggingface cache folder
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
     their respective prediction timesteps. It also contains the classification flag.
     """
+    # Check data existence
+    if os.path.exists(path):
+        dataset = load_dataset(path, cache_dir=cache_dir)
+    else:
+        dataset = load_dataset("mnist", cache_dir=cache_dir)
+
     # Load MNIST data
-    dataset = load_dataset(path, cache_dir=cache_dir) if path else load_dataset("mnist")
     X = np.concatenate([np.array(dataset['train']['image']), np.array(dataset['test']['image'])]).transpose(0, 2, 1) # so we can read it column by column
     Y = np.concatenate([np.array(dataset['train']['label']), np.array(dataset['test']['label'])])
 
