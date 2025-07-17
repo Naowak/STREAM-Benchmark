@@ -1,6 +1,21 @@
 import stream_benchmark.evals as evals
 import numpy as np
 
+tasks = [
+    'sinus_forecasting',
+    'chaotic_forecasting',
+    'discrete_postcasting',
+    'continuous_postcasting',
+    'discrete_pattern_completion',
+    'continuous_pattern_completion',
+    'bracket_matching',
+    'simple_copy',
+    'selective_copy',
+    'adding_problem',
+    'sorting_problem',
+    'sequential_mnist',
+]
+
 def compute_score(Y, Y_hat, prediction_timesteps, classification):
     """
     Compute the accuracy of the model.
@@ -41,7 +56,7 @@ def compute_score(Y, Y_hat, prediction_timesteps, classification):
 
     return score
 
-def build_task(task_name, difficulty='small'):
+def build_task(task_name, difficulty='small', seed=None, **kwargs):
     """
     Build the task.
 
@@ -50,6 +65,9 @@ def build_task(task_name, difficulty='small'):
         'continuous_postcasting', 'discrete_pattern_completion', 'continuous_pattern_completion', 'bracket_matching',
         'simple_copy', 'selective_copy', 'adding_problem', 'sorting_problem', and 'sequential_mnist'
     - difficulty (str): Difficulty level of the task ('small', 'medium' or 'large')
+    - seed (int, optional): Seed for reproducibility. Default is None.
+
+    The other optional parameters are given as arguments in the task generation function.
 
     Returns:
     - Task: Task object
@@ -71,6 +89,10 @@ def build_task(task_name, difficulty='small'):
     # Get the function and parameters from the stream config
     fct = stream[task_name]['fct']
     params = stream[task_name]['params']
+    params['seed'] = seed
+
+    # Update params with optional arguments
+    params |= kwargs
 
     # Generate the task
     return fct(**params)

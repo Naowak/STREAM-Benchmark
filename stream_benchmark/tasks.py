@@ -55,7 +55,7 @@ def _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, 
 
 # ------------ SIMPLE MEMORY TEST ------------ #
 
-def generate_discrete_postcasting(n_train=1000, n_valid=200, n_test=200, sequence_length=1000, delay=10, n_symbols=8):
+def generate_discrete_postcasting(n_train=1000, n_valid=200, n_test=200, sequence_length=1000, delay=10, n_symbols=8, seed=None):
     """
     [Multi sequence]
     Generates a copy task: the model must reproduce the input sequence 
@@ -68,6 +68,7 @@ def generate_discrete_postcasting(n_train=1000, n_valid=200, n_test=200, sequenc
     - sequence_length (int): sequence length
     - delay (int): delay before reproducing the sequence
     - n_symbols (int): number of possible symbols
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -75,19 +76,21 @@ def generate_discrete_postcasting(n_train=1000, n_valid=200, n_test=200, sequenc
     """
     def generate_one_sample():
         # Generate the sequence
-        sequence = np.random.randint(0, n_symbols, size=sequence_length)
+        sequence = rng.integers(0, n_symbols, size=sequence_length)
         input = np.eye(n_symbols)[sequence].reshape(sequence_length, n_symbols)
         target = np.concatenate([np.zeros((delay, n_symbols)), input[:-delay, :]], axis=0)
         timesteps = np.arange(delay, sequence_length)
 
         return input, target, timesteps
-
+    
+    # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
 
 
 
-def generate_continuous_postcasting(n_train=1000, n_valid=200, n_test=200, sequence_length=1000, delay=10):
+def generate_continuous_postcasting(n_train=1000, n_valid=200, n_test=200, sequence_length=1000, delay=10, seed=None):
     """
     [Multi sequence]
     Generates a copy task: the model must reproduce the input sequence 
@@ -99,6 +102,7 @@ def generate_continuous_postcasting(n_train=1000, n_valid=200, n_test=200, seque
     - n_test (int): number of test samples
     - sequence_length (int): sequence length
     - delay (int): delay before reproducing the sequence
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -106,21 +110,24 @@ def generate_continuous_postcasting(n_train=1000, n_valid=200, n_test=200, seque
     """
     def generate_one_sample():
         # Generate the sequence
-        input = np.random.uniform(-0.8, 0.8, size=sequence_length).reshape(sequence_length, 1)
+        input = rng.uniform(-0.8, 0.8, size=sequence_length).reshape(sequence_length, 1)
         target = np.concatenate([np.zeros((delay, 1)), input[:-delay, :]], axis=0)
         timesteps = np.arange(delay, sequence_length)
 
         return input, target, timesteps
-
+    
+    # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=False)
 
 # ------------ SIGNAL PROCESSING TEST ------------ #
 
-def generate_sinus_forecasting(sequence_length=1000, forecast_length=1, training_ratio=0.8, validation_ratio=0.1, testing_ratio=0.1):
+def generate_sinus_forecasting(sequence_length=1000, forecast_length=1, training_ratio=0.8, validation_ratio=0.1, testing_ratio=0.1, seed=None):
     """
     [Single sequence]
     Generates a frequency-modulated sinusoidal signal.
     The model must predict the signal frequency at the next timestep.
+    The signal is deterministic and there is no random train-test split, no seed is needed.
 
     Args:
     - sequence_length (int): sequence length
@@ -181,11 +188,12 @@ def generate_sinus_forecasting(sequence_length=1000, forecast_length=1, training
 
     return data
 
-def generate_chaotic_forecasting(sequence_length=1000, forecast_length=1, training_ratio=0.8, validation_ratio=0.1, testing_ratio=0.1):
+def generate_chaotic_forecasting(sequence_length=1000, forecast_length=1, training_ratio=0.8, validation_ratio=0.1, testing_ratio=0.1, seed=None):
     """
     [Single sequence]
     Generates a chaotic time series (Lorenz system).
     The model must predict the system state at the next timestep.
+    The signal is deterministic and there is no random train-test split, no seed is needed.
 
     Args:
     - sequence_length (int): sequence length
@@ -267,7 +275,7 @@ def generate_chaotic_forecasting(sequence_length=1000, forecast_length=1, traini
 
 # ------------ LONG-TERM DEPENDENCY TEST ------------ #
 
-def generate_discrete_pattern_completion(n_train=1000, n_valid=200, n_test=200, sequence_length=1000, n_symbols=8, base_length=5, mask_ratio=0.2):
+def generate_discrete_pattern_completion(n_train=1000, n_valid=200, n_test=200, sequence_length=1000, n_symbols=8, base_length=5, mask_ratio=0.2, seed=None):
     """
     [Multi sequence]
     The model must identify and complete repetitive patterns.
@@ -283,6 +291,7 @@ def generate_discrete_pattern_completion(n_train=1000, n_valid=200, n_test=200, 
     - n_symbols (int): number of possible symbols
     - base_length (int): pattern length
     - mask_ratio (float): proportion of symbols to mask
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -290,12 +299,12 @@ def generate_discrete_pattern_completion(n_train=1000, n_valid=200, n_test=200, 
     """
     def generate_one_sample():
         # Generate a base pattern
-        base_pattern = np.random.randint(0, n_symbols, size=base_length)
+        base_pattern = rng.integers(0, n_symbols, size=base_length)
         sequence = np.tile(base_pattern, sequence_length // base_length + 1)[:sequence_length]
 
         # Mask some parts so that the model predicts them
         nb_masked = int(sequence_length * mask_ratio)
-        mask = np.random.choice(sequence_length, nb_masked, replace=False)
+        mask = rng.choice(sequence_length, nb_masked, replace=False)
         masked_sequence = sequence.copy()
         masked_sequence[mask] = n_symbols
 
@@ -307,9 +316,10 @@ def generate_discrete_pattern_completion(n_train=1000, n_valid=200, n_test=200, 
         return input, target, timesteps
 
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
-def generate_continuous_pattern_completion(n_train=1000, n_valid=200, n_test=200, sequence_length=100, base_length=5, mask_ratio=0.2):
+def generate_continuous_pattern_completion(n_train=1000, n_valid=200, n_test=200, sequence_length=100, base_length=5, mask_ratio=0.2, seed=None):
     """
     [Multi sequence]
     The model must identify and complete repetitive patterns.
@@ -324,6 +334,7 @@ def generate_continuous_pattern_completion(n_train=1000, n_valid=200, n_test=200
     - base_length (int): pattern length
     - mask_ratio (float): proportion of masked symbols
     - training_ratio (float): proportion of samples used for training
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -331,12 +342,12 @@ def generate_continuous_pattern_completion(n_train=1000, n_valid=200, n_test=200
     """
     def generate_one_sample():
         # Generate a base pattern
-        base_pattern = np.random.uniform(0, 1, size=base_length)
+        base_pattern = rng.uniform(0, 1, size=base_length)
         sequence = np.tile(base_pattern, sequence_length // base_length + 1)[:sequence_length]
 
         # Mask some parts so that the model predicts them
         nb_masked = int(sequence_length * mask_ratio)
-        mask = np.random.choice(sequence_length, nb_masked, replace=False)
+        mask = rng.choice(sequence_length, nb_masked, replace=False)
         masked_sequence = sequence.copy()
         masked_sequence[mask] = -1
 
@@ -346,11 +357,12 @@ def generate_continuous_pattern_completion(n_train=1000, n_valid=200, n_test=200
         timesteps = mask
 
         return input, target, timesteps
-
+    
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=False)
 
-def generate_simple_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=100, delay=10, n_symbols=8):
+def generate_simple_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=100, delay=10, n_symbols=8, seed=None):
     """
     [Multi sequence]
     Generates a copy task: the model must read an entire sequence, 
@@ -363,6 +375,7 @@ def generate_simple_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=
     - sequence_length (int): sequence length
     - delay (int): delay before reproducing the sequence
     - n_symbols (int): number of possible symbols
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -370,7 +383,7 @@ def generate_simple_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=
     """
     def generate_one_sample():
         # Generate a random sequence
-        sequence = np.random.randint(0, n_symbols, size=sequence_length)  # 8 possible symbols
+        sequence = rng.integers(0, n_symbols, size=sequence_length)  # 8 possible symbols
         sequence_onehot = np.eye(n_symbols)[sequence]
 
         # Create the input & target
@@ -384,11 +397,12 @@ def generate_simple_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=
         timesteps = np.arange(sequence_length + delay + 1, sequence_length + delay + 1 + sequence_length)
 
         return input_sequence, target_sequence, timesteps
-    
+
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
-def generate_selective_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=100, delay=2, n_markers=2, n_symbols=8):
+def generate_selective_copy(n_train=1000, n_valid=200, n_test=200, sequence_length=100, delay=2, n_markers=2, n_symbols=8, seed=None):
     """
     [Multi sequence]
     The model must read an entire sequence, memorize the marked elements,
@@ -402,6 +416,7 @@ def generate_selective_copy(n_train=1000, n_valid=200, n_test=200, sequence_leng
     - delay (int): delay before reproducing the sequence
     - n_markers (int): number of elements to memorize < sequence_length
     - n_symbols (int): number of possible symbols
+    - seed (int): random seed for reproducibility
 
     Return: 
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -409,9 +424,9 @@ def generate_selective_copy(n_train=1000, n_valid=200, n_test=200, sequence_leng
     """
     def generate_one_sample():
         # generate random sequence
-        sequence = np.random.randint(0, n_symbols, size=sequence_length)
+        sequence = rng.integers(0, n_symbols, size=sequence_length)
         sequence_onehot = np.eye(n_symbols)[sequence]
-        selected_indices = np.random.choice(sequence_length, n_markers, replace=False)
+        selected_indices = rng.choice(sequence_length, n_markers, replace=False)
         selected_indices.sort()
 
         # Create the input
@@ -428,13 +443,14 @@ def generate_selective_copy(n_train=1000, n_valid=200, n_test=200, sequence_leng
         timesteps = np.arange(sequence_length + delay + 1, sequence_length + delay + 1 + n_markers)
 
         return input, target, timesteps
-
+    
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
 # ------------ TEST FOR MANIPULATION OF RETAINED INFORMATION ------------ #
 
-def generate_adding_problem(n_train=1000, n_valid=200, n_test=200, sequence_length=100, max_number=9):
+def generate_adding_problem(n_train=1000, n_valid=200, n_test=200, sequence_length=100, max_number=9, seed=None):
     """
     [Multi sequence]
     The model must read a sequence of random numbers, 
@@ -446,6 +462,7 @@ def generate_adding_problem(n_train=1000, n_valid=200, n_test=200, sequence_leng
     - n_test (int): number of test samples
     - sequence_length (int): sequence length
     - max_number (int): maximum possible number
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -453,8 +470,8 @@ def generate_adding_problem(n_train=1000, n_valid=200, n_test=200, sequence_leng
     """
     def generate_one_sample():
         # Generate the sequence
-        sequence = np.random.randint(0, max_number, sequence_length)
-        selected_indices = np.random.choice(sequence_length, 2, replace=False)
+        sequence = rng.integers(0, max_number, sequence_length)
+        selected_indices = rng.choice(sequence_length, 2, replace=False)
         result = (sequence[selected_indices] + 1).sum()
 
         # Create input
@@ -471,11 +488,12 @@ def generate_adding_problem(n_train=1000, n_valid=200, n_test=200, sequence_leng
         timesteps = np.arange(sequence_length+1, sequence_length+2)
 
         return input, target, timesteps
-    
+
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
-def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_length=100, n_symbols=8):
+def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_length=100, n_symbols=8, seed=None):
     """
     [Multi sequence]
     Generates a sequence of symbols (one-hot) randomly, each associated with a position (one-hot). 
@@ -487,6 +505,7 @@ def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_len
     - n_test (int): number of test samples
     - sequence_length (int): sequence length
     - n_symbols (int): number of possible symbols
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -494,8 +513,8 @@ def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_len
     """
     def generate_one_sample():
         # Create a sequence of symbols & a random order
-        sequence = np.random.randint(0, n_symbols, sequence_length)
-        order = np.random.permutation(sequence_length)
+        sequence = rng.integers(0, n_symbols, sequence_length)
+        order = rng.permutation(sequence_length)
 
         # One-hot encode the sequence and order
         sequence_onehot = np.eye(n_symbols)[sequence]
@@ -518,9 +537,10 @@ def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_len
         return input, target, timesteps
     
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
-def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./data/mnist/", cache_dir="./data/"):
+def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./data/mnist/", cache_dir="./data/", seed=None):
     """
     [Multi sequence]
     Generates an MNIST image classification task: the model must read an image column by column,
@@ -532,6 +552,7 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./dat
     - n_test (int): number of test samples
     - path (str): path to the MNIST dataset, if path does not exist, the dataset is downloaded
     - cache_dir (str): path to the huggingface cache folder
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -556,7 +577,8 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./dat
     X = X / 255
 
     # Shuffle and select the samples
-    shuffle = np.random.permutation(X.shape[0])[:n_samples]
+    rng = np.random.default_rng(seed)
+    shuffle = rng.permutation(X.shape[0])[:n_samples]
     X = X[shuffle]
     Y = Y[shuffle]
 
@@ -598,7 +620,7 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./dat
 
     return data
 
-def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_length=100, max_depth=5):
+def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_length=100, max_depth=5, seed=None):
     """
     [Multi sequence]
     Generates a sequence of parentheses that the model must validate.
@@ -610,6 +632,7 @@ def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_le
     - n_test (int): number of test samples
     - sequence_length (int): sequence length
     - max_depth (int): maximum depth of parentheses
+    - seed (int): random seed for reproducibility
 
     Return:
     - data (dict): dictionary containing the training, validation and test sets as well as
@@ -621,7 +644,7 @@ def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_le
         remaining = length
         
         while remaining > 0:
-            if len(stack) == 0 or (remaining > len(stack) and len(stack) < max_depth and np.random.random() > 0.5):
+            if len(stack) == 0 or (remaining > len(stack) and len(stack) < max_depth and rng.random() > 0.5):
                 sequence.append('(')
                 stack.append('(')
             else:
@@ -644,8 +667,8 @@ def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_le
 
     def mutate_sequence(sequence, proba=0.35):
         nb_mutated = int(len(sequence) * proba)
-        index = np.random.choice(len(sequence), nb_mutated, replace=False)
-        mutation = ['(' if np.random.random() > 0.5 else ')' for _ in range(nb_mutated)]
+        index = rng.choice(len(sequence), nb_mutated, replace=False)
+        mutation = ['(' if rng.random() > 0.5 else ')' for _ in range(nb_mutated)]
         for i, bracket in zip(index, mutation):
             sequence[i] = bracket
         return sequence
@@ -653,7 +676,7 @@ def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_le
     def generate_one_sample():
         # Generate a sequence
         sequence = generate_valid_sequence(sequence_length, max_depth)
-        sequence = sequence if np.random.random() < 0.5 else mutate_sequence(sequence)
+        sequence = sequence if rng.random() < 0.5 else mutate_sequence(sequence)
         validity = check_validity(sequence)
 
         # One-hot encode the sequence
@@ -671,6 +694,7 @@ def generate_bracket_matching(n_train=1000, n_valid=200, n_test=200, sequence_le
         timesteps = np.arange(sequence_length+1, sequence_length+2)
 
         return input, target, timesteps
-    
+
     # Generate the samples
+    rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
