@@ -41,7 +41,7 @@ def compute_score(Y, Y_hat, prediction_timesteps, classification):
 
     return score
 
-def build_task(task_name, difficulty='small'):
+def build_task(task_name, difficulty='small', **kwargs):
     """
     Build the task.
 
@@ -50,6 +50,7 @@ def build_task(task_name, difficulty='small'):
         'continuous_postcasting', 'discrete_pattern_completion', 'continuous_pattern_completion', 'bracket_matching',
         'simple_copy', 'selective_copy', 'adding_problem', 'sorting_problem', and 'sequential_mnist'
     - difficulty (str): Difficulty level of the task ('small' or 'medium')
+    The other optional parameters are given as arguments in the task generation function.
 
     Returns:
     - Task: Task object
@@ -71,6 +72,9 @@ def build_task(task_name, difficulty='small'):
     # Get the function and parameters from the stream config
     fct = stream[task_name]['fct']
     params = stream[task_name]['params']
+
+    # Update params with optional arguments
+    params |= kwargs
 
     # Generate the task
     return fct(**params)

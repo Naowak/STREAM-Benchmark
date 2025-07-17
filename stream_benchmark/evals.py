@@ -123,6 +123,6 @@ stream_medium = {
     'sequential_mnist': {
         'fct': generate_sequential_mnist,
         'classification': True,
-        'params': {"n_train": 1000, "n_valid": 200, "n_test": 1000, "path": "./data/mnist/", "cache_dir": "./data/"},
+        'params': {"n_train": 1000, "n_valid": 200, "n_test": 1000},
     },
 }
