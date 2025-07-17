@@ -110,24 +110,32 @@ print(f"Score: {score}")
 
 ## 🔧 Task Configuration
 
-Each task supports two difficulty levels:
+Each task supports three difficulty levels (the following numbers may vary in function of the task):
 
-### Small (Fast prototyping)
+### Small 
 - Reduced sequence lengths and sample counts
 - Suitable for quick experiments and debugging
-- Example: 100-200 training samples, sequences of 50-200 timesteps
+- Example: 100 training samples, sequences of ~50-100 timesteps
 
-### Medium (Full evaluation)
+### Medium 
 - Realistic problem sizes
 - Suitable for thorough model evaluation
-- Example: 10,000 training samples, sequences of 20,000 timesteps
+- Example: 1,000 training samples, sequences of ~100-200 timesteps
+
+### Large 
+- Big Data configurations
+- Suitable for high-performance models
+- Example: 10,000 training samples, sequences of ~200-500 timesteps
 
 ```python
 # Small configuration (fast)
-task_small = sb.build_task('chaotic_forecasting', difficulty='small')
+task_small = sb.build_task('bracket_matching', difficulty='small')
 
 # Medium configuration (thorough)
-task_medium = sb.build_task('chaotic_forecasting', difficulty='medium')
+task_medium = sb.build_task('bracket_matching', difficulty='medium')
+
+# Large configuration (comprehensive)
+task_large = sb.build_task('bracket_matching', difficulty='large')
 ```
 
 ## 📊 Data Format
