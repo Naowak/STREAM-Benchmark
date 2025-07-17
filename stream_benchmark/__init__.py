@@ -49,7 +49,7 @@ def build_task(task_name, difficulty='small'):
     - task_name (str): Name of the task between 'sinus_forecasting', 'chaotic_forecasting', 'discrete_postcasting',
         'continuous_postcasting', 'discrete_pattern_completion', 'continuous_pattern_completion', 'bracket_matching',
         'simple_copy', 'selective_copy', 'adding_problem', 'sorting_problem', and 'sequential_mnist'
-    - difficulty (str): Difficulty level of the task ('small' or 'medium')
+    - difficulty (str): Difficulty level of the task ('small', 'medium' or 'large')
 
     Returns:
     - Task: Task object
@@ -58,14 +58,14 @@ def build_task(task_name, difficulty='small'):
     if task_name not in evals.stream_small:
         raise ValueError(f"Task {task_name} not found. Available tasks are: {list(evals.stream_small.keys())}")
     # Check if the difficulty level is valid
-    if difficulty not in ['small', 'medium']:
-        raise ValueError("Difficulty level must be 'small' or 'medium'.")
+    if difficulty not in ['small', 'medium', 'large']:
+        raise ValueError("Difficulty level must be 'small', 'medium' or 'large'.")
 
     # Get the corresponding stream configuration
     stream = {
         'small': evals.stream_small,
         'medium': evals.stream_medium,
-        # 'large': stream_large,
+        'large': evals.stream_large,
     }[difficulty]
 
     # Get the function and parameters from the stream config
