@@ -559,7 +559,7 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./dat
     their respective prediction timesteps. It also contains the classification flag.
     """
     # Check data existence, download from huggingface if necessary
-    if not os.path.exists(path) or not os.path.exist(os.path.join(path, "mnist_train.parquet")) or not os.path.exists(os.path.join(path, "mnist_test.parquet")):
+    if not os.path.exists(path) or not os.path.exists(os.path.join(path, "mnist_train.parquet")) or not os.path.exists(os.path.join(path, "mnist_test.parquet")):
         os.makedirs(path, exist_ok=True)
         link_test = "https://huggingface.co/datasets/ylecun/mnist/resolve/main/mnist/test-00000-of-00001.parquet?download=true"
         link_train = "https://huggingface.co/datasets/ylecun/mnist/resolve/main/mnist/train-00000-of-00001.parquet?download=true"
