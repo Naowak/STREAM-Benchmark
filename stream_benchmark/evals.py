@@ -186,6 +186,6 @@ stream_large = {
     'sequential_mnist': {
         'fct': generate_sequential_mnist,
         'classification': True,
-        'params': {"n_train": 10000, "n_valid": 2000, "n_test": 10000, "path": "./data/mnist/", "cache_dir": "./data/"},
+        'params': {"n_train": 10000, "n_valid": 2000, "n_test": 10000},
     },
 }
