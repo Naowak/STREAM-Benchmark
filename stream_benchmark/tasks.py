@@ -552,7 +552,6 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./dat
     - n_valid (int): number of validation samples
     - n_test (int): number of test samples
     - path (str): path to the MNIST dataset, if path does not exist, the dataset is downloaded
-    - cache_dir (str): path to the huggingface cache folder
     - seed (int): random seed for reproducibility
 
     Return:
