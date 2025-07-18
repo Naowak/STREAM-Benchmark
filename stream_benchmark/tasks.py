@@ -1,5 +1,6 @@
 import numpy as np
 from datasets import load_dataset
+import urllib.request
 import os
 
 
@@ -540,7 +541,7 @@ def generate_sorting_problem(n_train=1000, n_valid=200, n_test=200, sequence_len
     rng = np.random.default_rng(seed)
     return _generate_train_test_samples(n_train, n_valid, n_test, generate_one_sample, classification=True)
 
-def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./data/mnist/", cache_dir="./data/", seed=None):
+def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./data/mnist/", seed=None):
     """
     [Multi sequence]
     Generates an MNIST image classification task: the model must read an image column by column,
@@ -558,29 +559,32 @@ def generate_sequential_mnist(n_train=1000, n_valid=200, n_test=200, path="./dat
     - data (dict): dictionary containing the training, validation and test sets as well as
     their respective prediction timesteps. It also contains the classification flag.
     """
-    # Check data existence
-    if os.path.exists(path):
-        dataset = load_dataset(path, cache_dir=cache_dir)
-    else:
-        dataset = load_dataset("mnist", cache_dir=cache_dir)
-
-    # Load MNIST data
-    X = np.concatenate([np.array(dataset['train']['image']), np.array(dataset['test']['image'])]).transpose(0, 2, 1) # so we can read it column by column
-    Y = np.concatenate([np.array(dataset['train']['label']), np.array(dataset['test']['label'])])
-
+    # Check data existence, download from huggingface if necessary
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+        link_test = "https://huggingface.co/datasets/ylecun/mnist/resolve/main/mnist/test-00000-of-00001.parquet?download=true"
+        link_train = "https://huggingface.co/datasets/ylecun/mnist/resolve/main/mnist/train-00000-of-00001.parquet?download=true"
+        urllib.request.urlretrieve(link_test, os.path.join(path, "mnist_test.parquet"))
+        urllib.request.urlretrieve(link_train, os.path.join(path, "mnist_train.parquet"))
+    
+    # Load the dataset
+    dataset = load_dataset("parquet", data_files="./data/mnist/*.parquet")
+    nb_data = len(dataset['train']['image'])
+    
     # Check the number of samples
     n_samples = n_train + n_valid + n_test
-    if n_samples > X.shape[0]:
-        raise ValueError(f"Not enough samples in the dataset. {X.shape[0]} samples available, {n_samples} requested.")
-    
-    # Normalize the data
-    X = X / 255
+    if n_samples > nb_data:
+        raise ValueError(f"Not enough samples in the dataset. {nb_data} samples available, {n_samples} requested.")
 
     # Shuffle and select the samples
     rng = np.random.default_rng(seed)
-    shuffle = rng.permutation(X.shape[0])[:n_samples]
-    X = X[shuffle]
-    Y = Y[shuffle]
+    shuffle = rng.permutation(nb_data)[:n_samples]
+    dataset = dataset['train'][shuffle]
+    X = np.array(dataset['image']).transpose(0, 2, 1)  # so we can read it column by column
+    Y = np.array(dataset['label'])
+
+    # Normalize the data
+    X = X / 255    
 
     # Create inputs
     inputs = np.zeros((X.shape[0], X.shape[1]+2, X.shape[2]+1))
