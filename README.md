@@ -5,7 +5,7 @@ A comprehensive benchmark suite for evaluating sequence modeling capabilities of
 ## 🚀 Features
 
 - **12 Diverse Tasks**: From simple memory tests to complex pattern recognition
-- **Multiple Difficulty Levels**: Small and medium configurations for different computational budgets
+- **Multiple Difficulty Levels**: Small, medium and large configurations. Advice : if you're building an architecture, you should begin with small.
 - **Unified Interface**: Consistent API across all tasks with standardized evaluation metrics
 - **Ready-to-Use**: Pre-configured datasets with train/validation/test splits
 - **Flexible**: Support for both classification and regression tasks
@@ -30,7 +30,7 @@ pip install -e .
 import stream_benchmark as sb
 
 # Build a task
-task_data = sb.build_task('simple_copy', difficulty='small')
+task_data = sb.build_task('simple_copy', difficulty='small', seed=0)
 
 # Access the data
 X_train = task_data['X_train']  # Training inputs
@@ -127,15 +127,17 @@ Each task supports three difficulty levels (the following numbers may vary in fu
 - Suitable for high-performance models
 - Example: 10,000 training samples, sequences of ~200-500 timesteps
 
+For the tasks that allow it, the difficulty is also adjusted by the dimensions of input & output.
+
 ```python
 # Small configuration (fast)
-task_small = sb.build_task('bracket_matching', difficulty='small')
+task_small = sb.build_task('bracket_matching', difficulty='small', seed=0)
 
 # Medium configuration (thorough)
-task_medium = sb.build_task('bracket_matching', difficulty='medium')
+task_medium = sb.build_task('bracket_matching', difficulty='medium', seed=0)
 
 # Large configuration (comprehensive)
-task_large = sb.build_task('bracket_matching', difficulty='large')
+task_large = sb.build_task('bracket_matching', difficulty='large', seed=0)
 ```
 
 ## 📊 Data Format
@@ -153,7 +155,7 @@ All tasks return a standardized dictionary:
     'X_test': np.ndarray,       # Test inputs
     'Y_test': np.ndarray,       # Test targets
     'T_test': np.ndarray,       # Test prediction timesteps
-    'classification': bool      # True for classification, False for regression
+    'classification': bool      # True for classification, False for regression : used to select the correspongind loss
 }
 ```
 
@@ -162,6 +164,7 @@ All tasks return a standardized dictionary:
 ```python
 import stream_benchmark as sb
 import numpy as np
+from MyModel import MyModel
 
 def evaluate_model_on_all_tasks(model, difficulty='small'):
     """Evaluate a model on all available tasks."""
@@ -182,8 +185,12 @@ def evaluate_model_on_all_tasks(model, difficulty='small'):
         task_data = sb.build_task(task_name, difficulty=difficulty)
         
         # Train model (simplified)
-        model.fit(task_data['X_train'], task_data['Y_train'])
-        
+        model = MyModel(...)
+        model.train(task_data['X_train'], task_data['Y_train'], task_data['T_train'])
+        # If you want your model to learn all timesteps, including the ones that are not evaluated :
+        # Comment the previous line and uncomment the following one
+        # model.train(task_data['X_train'], task_data['Y_train'])
+
         # Predict on test set
         Y_pred = model.predict(task_data['X_test'])
         
